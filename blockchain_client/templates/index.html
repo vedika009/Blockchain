@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Blockchain Client</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fce4ec; /* Light pink background */
+        }
+
+        .navbar {
+            margin-bottom: 50px;
+            background-color: #e91e63; /* Pink background */
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff !important; /* White text */
+        }
+
+        .navbar-nav .nav-item.active .nav-link {
+            color: #ff80ab !important; /* Lighter pink for active link */
+        }
+
+        .card {
+            margin-top: 50px;
+            border: 1px solid #f48fb1; /* Light pink border */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f8bbd0; /* Light pink card background */
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .btn-primary {
+            background-color: #e91e63; /* Pink button background */
+            border-color: #e91e63;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+
+        .form-control {
+            background-color: #ffffff;
+            border: 1px solid #f48fb1; /* Light pink border for input fields */
+            border-radius: 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f8bbd0; /* Light pink alert background */
+            color: #d32f2f; /* Darker red text for contrast */
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #e91e63; /* Dark pink for labels */
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        .card-title {
+            color: #c2185b; /* Dark pink for card titles */
+        }
+
+        .card-text {
+            color: #c2185b; /* Dark pink for card text */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Blockchain Client</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Wallet Generator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/make/transaction">Make Transaction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/view/transactions">View Transactions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12 text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Wallet Generator</h4>
+                        <p class="card-text">Click the button below to generate your blockchain wallet</p>
+                        <button type="button" class="btn btn-primary btn-lg" id="generateWallet">Generate Wallet</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label form-label">Address:</label>
+                <div class="col-sm-10">
+                    <textarea id="address" rows="3" class="form-control" readonly></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label form-label">Public Key:</label>
+                <div class="col-sm-10">
+                    <textarea id="public_key" rows="3" class="form-control" readonly></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label form-label">Private Key:</label>
+                <div class="col-sm-10">
+                    <textarea id="private_key" rows="3" class="form-control" readonly></textarea>
+                </div>
+            </div>
+
+            <div class="row" id="warning" style="display:none">
+                <div class="col-sm-12">
+                    <div class="alert alert-danger" role="alert">
+                        <strong>IMPORTANT:</strong>
+                        <ul>
+                            <li>Save your private and public keys. These keys cannot be recovered!</li>
+                            <li>Don't share your private key with anyone!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        $(function () {
+            $('#generateWallet').click(function () {
+                $.ajax({
+                    url: '/wallet/new',
+                    type: 'GET',
+                    success: function (response) {
+                        $('#address').val(response.address);
+                        $('#public_key').val(response.public_key);
+                        $('#private_key').val(response.private_key);
+                        $('#warning').show();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
